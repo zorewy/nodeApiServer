@@ -1,15 +1,14 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+const http = require('http');
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
 
-var apiRouter = require('./routes/api');
-var usersRouter = require('./routes/users');
-var wsRouter = require('./routes/ws');
-
-var expressWs = require('express-ws')(express());
-var app = expressWs.app;
+const apiRouter = require('./routes/api');
+const usersRouter = require('./routes/users');
+const socket = require('./socket');
+const app = express();
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -21,7 +20,6 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/api', apiRouter);
-app.ws('/ws', wsRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -39,4 +37,8 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-app.listen(1314)
+const server = http.createServer(app);
+socket.listen(server);
+server.listen(1314, function () {
+	console.log(`http://localhost:1314`)
+});
